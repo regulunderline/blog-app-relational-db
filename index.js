@@ -46,6 +46,11 @@ Blog.init({
   modelName: 'blog'
 })
 
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
+
 app.get('/api/blogs', async (req, res) => {
   const blogs = await Blog.findAll()
   blogs.forEach(b => {
@@ -54,10 +59,16 @@ app.get('/api/blogs', async (req, res) => {
   res.json(blogs)
 })
 
-const PORT = process.env.PORT || 3001
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+app.get('/api/blogs/:id', async (req, res) => {
+  const blog = await Blog.findByPk(req.params.id)
+  if (blog) {
+    res.json(blog)
+  } else {
+    res.status(404).end()
+  }
 })
+
+app.use(express.json())
 
 app.post('/api/blogs', async (req, res) => {
   try {
@@ -65,5 +76,15 @@ app.post('/api/blogs', async (req, res) => {
     return res.json(blog)
   } catch(error) {
     return res.status(400).json({ error })
+  }
+})
+
+app.delete('/api/blogs/:id', async (req, res) => {
+  const blog = await Blog.findByPk(req.params.id)
+  if (blog) {
+    await blog.destroy()
+    res.status(204).end()
+  } else {
+    res.status(404).end()
   }
 })
