@@ -31,11 +31,24 @@ router.get('/:id', blogFinder, async (req, res) => {
   }
 })
 
-router.delete('/:id', blogFinder, async (req, res) => {
-  if (req.blog) {
-    await req.blog.destroy()
+router.delete('/:id', blogFinder, async (req, res, next) => {
+  try {
+    if(!req.decodedToken) {
+     throw new Error('token missing', { cause: 401 })
+    }
+    if(req.decodedToken.error) {
+      throw new Error(req.decodedToken.error, { cause: 401 })
+    } 
+    if (req.decodedToken.id !== req.blog.userId){
+      throw new Error ('blog is not yours', { cause: 401 })
+    }
+    if (req.blog) {
+      await req.blog.destroy()
+    }
+    res.status(204).end()
+  } catch (e) {
+    next(e)
   }
-  res.status(204).end()
 })
 
 router.put('/:id', blogFinder, async (req, res, next) => {
