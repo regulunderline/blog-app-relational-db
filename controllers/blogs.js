@@ -2,6 +2,8 @@ const router = require('express').Router()
 
 const { Blog } = require('../models')
 
+const { errorHandler } = require('../util/middleware')
+
 router.get('/', async (req, res) => {
   const blogs = await Blog.findAll()
   res.json(blogs)
@@ -49,12 +51,6 @@ router.put('/:id', blogFinder, async (req, res, next) => {
     res.status(404).end()
   }
 })
-
-const errorHandler = (e, req, res, next) => {
-  res.status(400).json(e.message)
-
-  next(e)
-}
 
 router.use(errorHandler)
 
