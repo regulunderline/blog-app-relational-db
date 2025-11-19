@@ -5,17 +5,17 @@ const { Blog } = require('../models')
 
 const errorHandler = (error, req, res, next) => {
   try {
-    console.log(error.cause)
     error.cause === 401 &&
       res.status(401).json(error.message)
     error.errors.map(e => {
       e.type === 'Validation error' &&
         res.status(400).json(e.message)
+      e.type === 'notNull Violation' &&
+        res.status(400).json(`provide ${e.path}`)
     })
   } catch {
     res.status(520).json(error.message)
   }
-  res.status(520).json(error.message)
   next(error)
 }
 
