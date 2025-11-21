@@ -1,21 +1,16 @@
 const jwt = require('jsonwebtoken')
 const { SECRET } = require('./config')
 
-const { Blog } = require('../models')
-
 const errorHandler = (error, req, res, next) => {
-  try {
-    error.cause === 401 &&
-      res.status(401).json(error.message)
-    error.errors.map(e => {
-      e.type === 'Validation error' &&
-        res.status(400).json(e.message)
-      e.type === 'notNull Violation' &&
-        res.status(400).json(`provide ${e.path}`)
-    })
-  } catch {
-    res.status(520).json(error.message)
-  }
+  error.cause === 401 &&
+    res.status(401).json(error.message)
+  error.errors && error.errors.map(e => {
+    e.type === 'Validation error' &&
+      res.status(400).json(e.message)
+    e.type === 'notNull Violation' &&
+      res.status(400).json(`provide ${e.path}`)
+  })
+  res.status(520).json(error.message)
   next(error)
 }
 
@@ -33,17 +28,4 @@ const tokenExtractor = (req, res, next) => {
   next()
 }
 
-const blogsLinker = async (req, res, next) => {
-  (req.decodedToken && !req.decodedToken.error) && await Blog.update(
-    { userId: req.decodedToken.id },
-    {
-      where: {
-        userId: null
-      }
-    }
-  )
-
-  next()
-} 
-
-module.exports = { errorHandler, tokenExtractor, blogsLinker }
+module.exports = { errorHandler, tokenExtractor }

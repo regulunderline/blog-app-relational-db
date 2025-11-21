@@ -10,11 +10,10 @@ const loginRouter = require('./controllers/login')
 const authorRouter = require('./controllers/authors')
 const readinglistsRouter = require('./controllers/readinglists')
 
-const { tokenExtractor, blogsLinker } = require('./util/middleware')
+const { tokenExtractor } = require('./util/middleware')
 
 app.use(express.json())
 app.use(tokenExtractor)
-app.use(blogsLinker)
 
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)
