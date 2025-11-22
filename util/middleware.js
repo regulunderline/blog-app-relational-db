@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken')
 const { SECRET } = require('./config')
 
+const Session = require('../models/session')
+
 const errorHandler = (error, req, res, next) => {
   error.cause === 401 &&
     res.status(401).json(error.message)
@@ -14,11 +16,16 @@ const errorHandler = (error, req, res, next) => {
   next(error)
 }
 
-const tokenExtractor = (req, res, next) => {
+const tokenExtractor = async (req, res, next) => {
   const authorization = req.get('authorization')
   if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
     try {
-      req.decodedToken = jwt.verify(authorization.substring(7), SECRET)
+      const decodedToken = jwt.verify(authorization.substring(7), SECRET)
+      console.log(decodedToken, 'aaaaaaaaa')
+      const foundSession = await Session.findByPk(decodedToken.session)
+      req.decodedToken = foundSession 
+        ? decodedToken
+        : { error: 'Session not found' }
     } catch{
       req.decodedToken = { error: 'token invalid' }
     }
